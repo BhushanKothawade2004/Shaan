@@ -1,0 +1,134 @@
+TSP USING LCBB 3 steps
+9 For implementing Travelling Salesman problem using LC branch and bound technique, design
+the following 3 functions
+i) Generate the start (first) node for the LCBB TSP
+ii) Generate all the children of a given node
+iii) To check whether a given node is a leaf node
+
+import java.util.*;
+
+public class LCBBTSP {
+
+    // Generate the start (first) node for the LCBB TSP
+    public static List<Integer> generateStartNode() {
+        return Collections.singletonList(0); // Start with city 0
+    }
+
+    // Generate all the children of a given node
+    public static List<List<Integer>> generateChildren(List<Integer> path, int n) {
+        List<List<Integer>> children = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (!path.contains(i)) { // Add only unvisited cities
+                List<Integer> newPath = new ArrayList<>(path);
+                newPath.add(i);
+                children.add(newPath);
+            }
+        }
+        return children;
+    }
+
+    // Check whether a given node is a leaf node
+    public static boolean isLeafNode(List<Integer> path, int n) {
+        return path.size() == n; // A leaf node has visited all cities
+    }
+
+    // Get the distance matrix from the user
+    public static int[][] getDistanceMatrix(int n, Scanner scanner) {
+        int[][] distMatrix = new int[n][n];
+        System.out.println("Enter the distance matrix row by row:");
+        for (int i = 0; i < n; i++) {
+            System.out.println("Distances from city " + i + ":");
+            for (int j = 0; j < n; j++) {
+                distMatrix[i][j] = scanner.nextInt();
+            }
+        }
+        return distMatrix;
+    }
+
+    // Calculate the cost of the current path
+    public static int calculateCost(List<Integer> path, int[][] distMatrix) {
+        int cost = 0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            cost += distMatrix[path.get(i)][path.get(i + 1)];
+        }
+        return cost;
+    }
+
+    // Solve TSP using LC Branch and Bound
+    public static void solveTSP(int[][] distMatrix, int n) {
+        List<Integer> bestPath = null;
+        int bestCost = Integer.MAX_VALUE;
+
+        // Queue for storing paths to explore
+        Queue<List<Integer>> queue = new LinkedList<>();
+        queue.add(generateStartNode()); // Use the generateStartNode function
+
+        while (!queue.isEmpty()) {
+            List<Integer> path = queue.poll();
+
+            if (isLeafNode(path, n)) { // Use the isLeafNode function
+                // Calculate cost and return to the start
+                int cost = calculateCost(path, distMatrix) + distMatrix[path.get(path.size() - 1)][0];
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    bestPath = new ArrayList<>(path);
+                    bestPath.add(0); // Add start city to complete the loop
+                }
+            } else {
+                // Add children of the current node to the queue
+                queue.addAll(generateChildren(path, n)); // Use the generateChildren function
+            }
+        }
+
+        // Output the result
+        System.out.println("Best Path: " + bestPath);
+        System.out.println("Best Cost: " + bestCost);
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of cities: ");
+        int n = scanner.nextInt();
+
+        int[][] distMatrix = getDistanceMatrix(n, scanner);
+
+        solveTSP(distMatrix, n);
+
+        scanner.close();
+    }
+}
+
+Generate the Start (First) Node for TSP
+Algorithm:
+
+Initialize a list containing the starting city (e.g., city 0).
+Return this list
+
+Generate All the Children of a Given Node
+Algorithm:
+
+For each city 𝑖:
+a. Check if city 
+𝑖
+i is already in the current path.
+b. If not, create a new path by adding city 
+𝑖
+i to the current path.
+c. Add the new path to the list of children.
+Return the list of all children paths.
+
+Check Whether a Given Node is a Leaf Node
+Algorithm:
+
+Compare the size of the current path with the total number of cities 𝑛
+n.If size equals n, return true (it's a leaf node).
+Otherwise, return false
+
+Time Complexity:
+Worst Case: O(n!)
+O(n!): For exploring all permutations of cities.
+
+Space Complexity:
+Worst Case: O(n!)
+O(n!): To store all possible paths in the queue

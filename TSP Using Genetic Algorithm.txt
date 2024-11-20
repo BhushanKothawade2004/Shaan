@@ -1,0 +1,215 @@
+TSP Using Genetic Algorithm
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+
+class City {
+    int x, y;
+
+    public City(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public double distanceTo(City city) {
+        int xDist = Math.abs(this.x - city.x);
+        int yDist = Math.abs(this.y - city.y);
+        return Math.sqrt(xDist * xDist + yDist * yDist);
+    }
+
+    @Override
+    public String toString() {
+        return "City(" + x + ", " + y + ")";
+    }
+}
+
+class Route {
+    ArrayList<City> cities = new ArrayList<>();
+
+    public Route(ArrayList<City> cities) {
+        this.cities.addAll(cities);
+        Collections.shuffle(this.cities);
+    }
+
+    public double getTotalDistance() {
+        double distance = 0;
+        for (int i = 0; i < cities.size() - 1; i++) {
+            distance += cities.get(i).distanceTo(cities.get(i + 1));
+        }
+        // Return to the start
+        distance += cities.get(cities.size() - 1).distanceTo(cities.get(0));
+        return distance;
+    }
+
+    @Override
+    public String toString() {
+        return cities.toString();
+    }
+}
+
+class Population {
+    ArrayList<Route> routes = new ArrayList<>();
+
+    public Population(int size, ArrayList<City> cities) {
+        for (int i = 0; i < size; i++) {
+            routes.add(new Route(cities));
+        }
+    }
+
+    public Route getFittest() {
+        Route fittest = routes.get(0);
+        for (Route route : routes) {
+            if (route.getTotalDistance() < fittest.getTotalDistance()) {
+                fittest = route;
+            }
+        }
+        return fittest;
+    }
+}
+
+class GeneticAlgorithm {
+    private Random random = new Random();
+
+    public Population evolve(Population population) {
+        Population newPopulation = new Population(population.routes.size(), population.routes.get(0).cities);
+        // Elitism: Keep the best individual
+        newPopulation.routes.set(0, population.getFittest());
+
+        // Apply crossover and mutation
+        for (int i = 1; i < population.routes.size(); i++) {
+            Route parent1 = selectParent(population);
+            Route parent2 = selectParent(population);
+            Route child = crossover(parent1, parent2);
+            mutate(child);
+            newPopulation.routes.set(i, child);
+        }
+        return newPopulation;
+    }
+
+    private Route selectParent(Population population) {
+        // Tournament selection
+        Population tournament = new Population(5, population.routes.get(0).cities);
+        for (int i = 0; i < 5; i++) {
+            tournament.routes.set(i, population.routes.get(random.nextInt(population.routes.size())));
+        }
+        return tournament.getFittest();
+    }
+
+    private Route crossover(Route parent1, Route parent2) {
+        ArrayList<City> childCities = new ArrayList<>(Collections.nCopies(parent1.cities.size(), null));
+
+        // Crossover point
+        int start = random.nextInt(parent1.cities.size());
+        int end = random.nextInt(parent1.cities.size());
+
+        for (int i = Math.min(start, end); i < Math.max(start, end); i++) {
+            childCities.set(i, parent1.cities.get(i));
+        }
+
+        for (City city : parent2.cities) {
+            if (!childCities.contains(city)) {
+                for (int i = 0; i < childCities.size(); i++) {
+                    if (childCities.get(i) == null) {
+                        childCities.set(i, city);
+                        break;
+                    }
+                }
+            }
+        }
+        return new Route(childCities);
+    }
+
+    private void mutate(Route route) {
+        for (int i = 0; i < route.cities.size(); i++) {
+            if (Math.random() < 0.015) {
+                int j = random.nextInt(route.cities.size());
+
+                // Swap cities
+                Collections.swap(route.cities, i, j);
+            }
+        }
+    }
+}
+
+public class TSPGeneticAlgorithm {
+    public static void main(String[] args) {
+        // Create cities
+        ArrayList<City> cities = new ArrayList<>();
+        cities.add(new City(60, 200));
+        cities.add(new City(180, 200));
+        cities.add(new City(80, 180));
+        cities.add(new City(140, 180));
+        cities.add(new City(20, 160));
+        cities.add(new City(100, 160));
+        cities.add(new City(200, 160));
+        cities.add(new City(140, 140));
+        cities.add(new City(40, 120));
+        cities.add(new City(100, 120));
+
+        // Initialize population
+        Population population = new Population(100, cities);
+        GeneticAlgorithm ga = new GeneticAlgorithm();
+
+        int generations = 500;
+        for (int i = 0; i < generations; i++) {
+            population = ga.evolve(population);
+            System.out.println("Generation " + i + ": " + population.getFittest().getTotalDistance());
+        }
+
+        System.out.println("Final best route: " + population.getFittest());
+    }
+}
+
+Algorithm
+Step 1: Initialize Cities
+Define a set of cities, each with x and y coordinates.
+Step 2: Create Initial Population
+Generate a population of routes:
+Each route is a random permutation of the cities.
+Store the routes in the population.
+Step 3: Evaluate Fitness
+For each route in the population:
+Calculate the total distance of the route by summing the distances between consecutive cities and returning to the start.
+Shorter distances imply higher fitness.
+Step 4: Evolve Population
+Repeat for a predefined number of generations:
+Elitism: Retain the fittest route (shortest distance) from the current population.
+Selection: Use tournament selection to pick two parent routes:
+Randomly select a subset of routes.
+Choose the fittest route from this subset.
+Crossover: Create a child route from two parents:
+Randomly copy a portion of cities from one parent.
+Fill in the remaining cities from the other parent in order.
+Mutation: Introduce small random changes:
+Swap the positions of two cities in the route with a small probability.
+Add the child to the new population.
+Step 5: Terminate
+After the final generation, print the best route and its total distance.
+
+
+Time Complexity
+
+Initialization:
+Shuffling cities to create initial routes: O(P * N)
+Fitness Calculation:
+Calculating distance for one route: O(N)
+For all routes in a population: O(P * N)
+Selection:
+Tournament selection: O(P)
+Crossover:
+Merging two parent routes: O(N)
+For all routes: O(P * N)
+Mutation:
+Swapping cities in a route: O(1)
+For all routes: O(P * N)
+Total Time Complexity:
+O(G * (P * N))
+
+Space Complexity
+
+City Data: O(N)
+Population: O(P * N)
+Auxiliary Data Structures: O(N)
+Total Space Complexity:
+O(P * N)

@@ -1,0 +1,88 @@
+Mutate Chromosomes
+
+import java.util.*;
+
+public class TSPMutation {
+   
+   // Function to perform mutation by swapping two cities
+   public static void mutate(int[] chromosome) {
+      Random rand = new Random();
+      int n = chromosome.length;
+
+      // Select two random indices in the chromosome to swap
+      int index1 = rand.nextInt(n);
+      int index2 = rand.nextInt(n);
+
+      // Ensure index1 and index2 are not the same
+      while (index1 == index2) {
+         index2 = rand.nextInt(n);
+      }
+
+      // Swap the two cities
+      int temp = chromosome[index1];
+      chromosome[index1] = chromosome[index2];
+      chromosome[index2] = temp;
+   }
+
+   // Main function to demonstrate mutation
+   public static void main(String[] args) {
+      // Example parent chromosome for TSP
+      int[] parent = { 0, 1, 2, 3, 4 };
+
+      // Display the original chromosome (route)
+      System.out.println("Original Chromosome (Route): ");
+      System.out.println(Arrays.toString(parent));
+
+      // Perform mutation
+      mutate(parent);
+
+      // Display the mutated chromosome (route)
+      System.out.println("Mutated Chromosome (Route): ");
+      System.out.println(Arrays.toString(parent));
+   }
+}
+
+
+
+Mutation for Traveling Salesperson Problem (TSP)
+Mutation in the context of Genetic Algorithms (GAs) is an operation where a small random change is made to a chromosome (solution) to explore new areas of the solution space. The goal of mutation is to maintain genetic diversity in the population, which can prevent the algorithm from converging too early on a local optimum.
+
+For the Traveling Salesman Problem (TSP), mutation typically involves swapping two cities in the route to explore a potentially better solution.
+
+
+
+Explanation of the Algorithm
+Random Selection of Two Indices:
+
+The mutation function randomly selects two distinct indices from the chromosome array using rand.nextInt(n).
+We ensure that the two selected indices are not the same by checking them in a while loop.
+Swapping Cities:
+
+Once the indices are selected, we swap the values at those two indices. This represents a small change to the solution by swapping two cities in the TSP route.
+Display Results:
+
+The main function demonstrates how the mutation works by applying the mutate function to a parent chromosome (route) and displaying both the original and mutated chromosomes.
+Example Walkthrough
+Let's say we have the following chromosome (route) for a 5-city TSP:
+
+Original Chromosome (Route):
+
+java
+Copy code
+{ 0, 1, 2, 3, 4 }
+Suppose the randomly chosen indices are index1 = 1 and index2 = 3.
+After swapping the cities at indices 1 and 3, the new mutated chromosome would be:
+Mutated Chromosome (Route):
+
+java
+Copy code
+{ 0, 3, 2, 1, 4 }
+Time and Space Complexity Analysis
+Time Complexity:
+Selecting two random indices: Selecting two random indices and ensuring they are distinct takes constant time, i.e., O(1).
+Swapping the cities: Swapping two values in the chromosome is a constant-time operation, i.e., O(1).
+So, the time complexity for this mutation function is O(1).
+
+Space Complexity:
+The mutation function modifies the chromosome array in place, so no additional space is needed for the mutation itself.
+The space complexity is O(1).

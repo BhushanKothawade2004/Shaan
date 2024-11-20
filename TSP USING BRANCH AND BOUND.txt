@@ -1,0 +1,123 @@
+TSP USING BRANCH AND BOUND
+
+import java.util.*;
+
+    public class TSPBranchAndBound {
+
+    // Get the distance matrix from the user
+    public static int[][] getDistanceMatrix(int n, Scanner scanner) {
+        int[][] distMatrix = new int[n][n];
+        System.out.println("Enter the distance matrix row by row:");
+        for (int i = 0; i < n; i++) {
+            System.out.println("Distances from city " + i + ":");
+            for (int j = 0; j < n; j++) {
+                distMatrix[i][j] = scanner.nextInt();
+            }
+        }
+        return distMatrix;
+    }
+
+    // Calculate the cost of the current path
+    public static int calculateCost(List<Integer> path, int[][] distMatrix) {
+        int cost = 0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            cost += distMatrix[path.get(i)][path.get(i + 1)];
+        }
+        return cost;
+    }
+
+    // Generate next cities to visit
+    public static List<List<Integer>> getNextPaths(List<Integer> path, int n) {
+        List<List<Integer>> nextPaths = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (!path.contains(i)) { // Add only unvisited cities
+                List<Integer> newPath = new ArrayList<>(path);
+                newPath.add(i);
+                nextPaths.add(newPath);
+            }
+        }
+        return nextPaths;
+    }
+
+    // Solve TSP using a simple branch and bound approach
+    public static void solveTSP(int[][] distMatrix, int n) {
+        List<Integer> bestPath = null;
+        int bestCost = Integer.MAX_VALUE;
+
+        // Queue for storing paths to explore
+        Queue<List<Integer>> queue = new LinkedList<>();
+        queue.add(Collections.singletonList(0)); // Start from city 0
+
+        while (!queue.isEmpty()) {
+            List<Integer> path = queue.poll();
+
+            if (path.size() == n) { // Complete path
+                int cost = calculateCost(path, distMatrix) + distMatrix[path.get(path.size() - 1)][0]; // Return to start
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    bestPath = new ArrayList<>(path);
+                    bestPath.add(0); // Add start city to complete the loop
+                }
+            } else {
+                // Add next cities to explore
+                queue.addAll(getNextPaths(path, n));
+            }
+        }
+
+        // Output the result
+        System.out.println("Best Path: " + bestPath);
+        System.out.println("Best Cost: " + bestCost);
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of cities: ");
+        int n = scanner.nextInt();
+
+        int[][] distMatrix = getDistanceMatrix(n, scanner);
+
+        solveTSP(distMatrix, n);
+
+        scanner.close();
+    }
+}
+
+Enter the number of cities: 4
+Enter the distance matrix row by row:
+Distances from city 0:
+0 10 5 3
+Distances from city 1:
+8 0 9 7
+Distances from city 2:
+1 6 0 9
+Distances from city 3:
+2 3 8 0
+
+
+Best Path: [0, 3, 1, 2]
+Best Cost: 16
+
+
+Algorithm for Traveling Salesman Problem (TSP) using Branch and Bound:
+Input: The algorithm first accepts an integer n representing the number of cities and then takes an n x n distance matrix as input from the user, where the element at distMatrix[i][j] represents the cost to travel from city i to city j.
+
+Branch and Bound Approach:
+
+The algorithm starts from the first city (city 0) and explores all possible paths using a breadth-first search approach (FIFO queue).
+For each path, the algorithm checks if all cities have been visited. If so, it calculates the total cost of the path, including returning to the starting city.
+The algorithm keeps track of the best (minimum-cost) path and its cost found during the exploration.
+The search continues until all possible paths are explored, and the best path with the minimum cost is found.
+Output: Once all paths are explored, the algorithm outputs the best path found and the associated cost.
+
+
+Time Complexity:
+Worst-case time complexity: O(n!) (due to exploring all possible paths)
+
+Space Complexity:
+Worst-case space complexity: O(n!) (due to storing all paths in the queue)
+Additional space for distance matrix: O(n^2)
+
+
+
+

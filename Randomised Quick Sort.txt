@@ -1,0 +1,65 @@
+Randomised Quick Sort 
+
+import java.util.Random;
+
+public class RandomisedQuickSort {
+
+    public static void printArr(int arr[]) {
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + " ");
+        }
+        System.out.println();
+    }
+    
+    public static void randomquicksort(int arr[], int si, int ei) {
+        if (si>=ei) {
+            return;
+        }
+
+        int pidx = randomPartiton(arr, si, ei);
+
+        randomquicksort(arr, si, pidx-1);
+        randomquicksort(arr, pidx+1, ei);
+    }
+
+    public static int randomPartiton(int arr[], int si, int ei){
+        //Generate Random index between si and ei
+        Random rand = new Random();
+        int randomIndex = si + rand.nextInt(ei-si + 1);
+
+        //swap the randomly chosen pivot with the last element
+        int temp = arr[randomIndex];
+        arr[randomIndex] = arr[ei];
+        arr[ei] = temp;
+
+        //call the normal partition function 
+        return partition(arr, si, ei);
+    }
+
+    public static int partition(int arr[], int si, int ei) {
+        int pivot = arr[ei];
+        int i = si-1;
+
+        for (int j = si; j < ei; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+                // Swap elements at i and j
+                int temp = arr[j];
+                arr[j] = arr[i];
+                arr[i] = temp;
+            }
+        }
+        // Swap pivot with element at i + 1
+        i++;
+        int temp = arr[ei];
+        arr[ei] = arr[i];
+        arr[i] = temp;
+
+        return i;
+    }
+    public static void main(String[] args) {
+        int arr[] = {6, 3, 9, 5, 2, 8};
+        randomquicksort(arr, 0, arr.length-1);
+        printArr(arr);
+    }
+}

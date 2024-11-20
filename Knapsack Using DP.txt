@@ -1,0 +1,91 @@
+Knapsack Using DP
+
+import java.util.Scanner;
+
+public class KnapsackDP {
+
+    // Function to solve the knapsack problem using dynamic programming
+    public static int knapsack(int W, int[] wt, int[] val, int n) {
+        int[][] dp = new int[n + 1][W + 1];
+
+        // Build the DP table iteratively
+        for (int i = 0; i <= n; i++) {
+            for (int w = 0; w <= W; w++) {
+                if (i == 0 || w == 0) {
+                    dp[i][w] = 0; // Base case: no items or capacity is 0
+                } else if (wt[i - 1] <= w) {
+                    // Include the item or exclude it
+                    dp[i][w] = Math.max(val[i - 1] + dp[i - 1][w - wt[i - 1]], dp[i - 1][w]);
+                } else {
+                    dp[i][w] = dp[i - 1][w]; // Exclude the item
+                }
+            }
+        }
+
+        return dp[n][W];
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Input: number of items
+        System.out.print("Enter the number of items: ");
+        int n = sc.nextInt();
+
+        int[] val = new int[n];
+        int[] wt = new int[n];
+
+        // Input: values of the items
+        System.out.println("Enter the values of the items:");
+        for (int i = 0; i < n; i++) {
+            val[i] = sc.nextInt();
+        }
+
+        // Input: weights of the items
+        System.out.println("Enter the weights of the items:");
+        for (int i = 0; i < n; i++) {
+            wt[i] = sc.nextInt();
+        }
+
+        // Input: knapsack capacity
+        System.out.print("Enter the capacity of the knapsack: ");
+        int W = sc.nextInt();
+
+        // Output: maximum value that can be achieved
+        System.out.println("Maximum value in knapsack = " + knapsack(W, wt, val, n));
+
+        sc.close();
+    }
+}
+
+
+Time Complexity:
+
+O(n * W)
+
+The algorithm iterates over every item (n) and every possible weight (W), resulting in a time complexity of O(n * W).
+
+Space Complexity:
+
+O(n * W)
+
+The algorithm utilizes a 2D dynamic programming table of size (n+1) x (W+1), leading to a space complexity of O(n * W)
+
+Steps:
+Initialization:
+
+Create a 2D array dp[][] of size (n+1) x (W+1) where dp[i][w] will store the maximum value that can be obtained with the first i items and a knapsack capacity of w.
+Base Case:
+
+Set dp[0][w] = 0 for all w (when no items are considered).
+Set dp[i][0] = 0 for all i (when the knapsack has a capacity of 0).
+Recursive Case:
+
+For each item i (1 to n), and each capacity w (1 to W):
+If the weight of the current item (wt[i-1]) is less than or equal to the current capacity w:
+Include the item: dp[i][w] = max(dp[i-1][w], val[i-1] + dp[i-1][w - wt[i-1]])
+Exclude the item: dp[i][w] = dp[i-1][w]
+Otherwise, exclude the item: dp[i][w] = dp[i-1][w]
+Return the result:
+
+The value stored in dp[n][W] will be the maximum value that can be obtained with the given items and knapsack capacity.

@@ -1,0 +1,168 @@
+Dining Philosopher
+
+import java.util.Scanner;
+import java.util.concurrent.Semaphore;
+
+public class DiningPhilosophers {
+    private int numPhilosophers;  // Number of philosophers (input by user)
+    private final int maxMeals = 1;  // Fixed number of meals per philosopher
+    private Semaphore[] chopsticks;  // Semaphore array representing chopsticks
+
+    // Constructor to initialize semaphores
+    public DiningPhilosophers(int numPhilosophers) {
+        this.numPhilosophers = numPhilosophers;
+        chopsticks = new Semaphore[numPhilosophers];
+        for (int i = 0; i < numPhilosophers; i++) {
+            chopsticks[i] = new Semaphore(1); // Each chopstick is a binary semaphore
+        }
+    }
+
+    // Philosopher behavior
+    public void philosopher(int philosopherId) {
+        int leftChopstick = philosopherId;
+        int rightChopstick = (philosopherId + 1) % numPhilosophers;
+        int meals = 0;
+
+        while (meals < maxMeals) {
+            try {
+                // Thinking
+                System.out.println("Philosopher " + philosopherId + " is thinking.");
+                Thread.sleep((long) (Math.random() * 1000));
+
+                // Attempt to pick up chopsticks
+                if (philosopherId % 2 == 0) {
+                    chopsticks[leftChopstick].acquire();
+                    System.out.println("Philosopher " + philosopherId + " picked up left chopstick.");
+                    chopsticks[rightChopstick].acquire();
+                    System.out.println("Philosopher " + philosopherId + " picked up right chopstick.");
+                } else {
+                    chopsticks[rightChopstick].acquire();
+                    System.out.println("Philosopher " + philosopherId + " picked up right chopstick.");
+                    chopsticks[leftChopstick].acquire();
+                    System.out.println("Philosopher " + philosopherId + " picked up left chopstick.");
+                }
+
+                // Eating
+                System.out.println("Philosopher " + philosopherId + " is eating.");
+                Thread.sleep((long) (Math.random() * 1000));
+
+                // Put down chopsticks
+                chopsticks[leftChopstick].release();
+                System.out.println("Philosopher " + philosopherId + " put down left chopstick.");
+                chopsticks[rightChopstick].release();
+                System.out.println("Philosopher " + philosopherId + " put down right chopstick.");
+                meals++;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Philosopher " + philosopherId + " has finished eating.");
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Get input for number of philosophers
+        System.out.print("Enter the number of philosophers: ");
+        int numPhilosophers = scanner.nextInt();
+
+        // Create an instance of DiningPhilosophers
+        DiningPhilosophers dp = new DiningPhilosophers(numPhilosophers);
+
+        // Create and start threads for each philosopher
+        Thread[] philosophers = new Thread[numPhilosophers];
+        for (int i = 0; i < numPhilosophers; i++) {
+            final int philosopherId = i;
+            philosophers[i] = new Thread(() -> dp.philosopher(philosopherId));
+            philosophers[i].start();
+        }
+
+        // Wait for all threads to complete
+        for (int i = 0; i < numPhilosophers; i++) {
+            try {
+                philosophers[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("All philosophers have finished eating.");
+        scanner.close();
+    }
+}
+
+Algorithm: Dining Philosophers Problem
+Initialization:
+
+Input the number of philosophers (numPhilosophers).
+Create an array of semaphores (chopsticks), one for each chopstick, initialized to 1.
+Create threads for each philosopher and assign them an ID (0 to numPhilosophers - 1).
+Philosopher Behavior:
+
+Each philosopher performs the following steps:
+Think: Simulate "thinking" by sleeping for a random duration.
+Pick Up Chopsticks:
+If the philosopher ID is even:
+Acquire the left chopstick (semaphore).
+Acquire the right chopstick (semaphore).
+If the philosopher ID is odd:
+Acquire the right chopstick (semaphore).
+Acquire the left chopstick (semaphore).
+Eat: Simulate "eating" by sleeping for a random duration.
+Put Down Chopsticks:
+Release the left chopstick (semaphore).
+Release the right chopstick (semaphore).
+Repeat or Exit:
+Exit after completing the specified number of meals (default is 1).
+Completion:
+
+Wait for all philosopher threads to finish using join().
+Print a message indicating that all philosophers have finished eating.
+
+
+
+Time Complexity
+Per Philosopher:
+
+Thinking and Eating: Both involve sleeping for a random duration, which is constant time for each iteration.
+Semaphore Operations: Acquiring and releasing semaphores are O(1) operations.
+Total for 1 philosopher: O(1) per meal.
+For numPhilosophers Philosophers:
+
+Each philosopher operates independently.
+If MAX_MEALS = 1, the total time complexity is: O(numPhilosophers), as all philosophers perform their operations in parallel.
+For Multiple Meals (MAX_MEALS = m):
+
+Each philosopher performs operations m times.
+Total time complexity: O(numPhilosophers * m).
+Space Complexity
+Semaphores:
+
+The array of semaphores requires space proportional to the number of philosophers: O(numPhilosophers).
+Threads:
+
+One thread per philosopher requires O(numPhilosophers) space for thread metadata.
+Other Variables:
+
+Constant space is used for each philosopher's local variables and synchronization primitives.
+Total space complexity: O(numPhilosophers).
+
+Summary
+Aspect	Complexity
+Time Complexity	O(numPhilosophers * m) for m meals
+Space Complexity	O(numPhilosophers)
+
+
+
+Semaphore:
+A semaphore is a synchronization primitive used to control access to a shared resource in concurrent programming.
+It maintains an internal counter, and operations are based on this counter:
+acquire(): Decreases the counter. If the counter is zero, the thread is blocked until the counter becomes positive.
+release(): Increases the counter. If any thread is blocked, one of them will be unblocked
+
+
+Mutex (Mutual Exclusion):
+A mutex is a special type of binary semaphore (counter is either 0 or 1) designed for mutual exclusion.
+It ensures that only one thread can access a critical section (a resource or piece of code) at a time:
+lock() or acquire(): The thread locks the mutex. If it's already locked by another thread, the calling thread will block until the mutex is released.
+unlock() or release(): The thread releases the mutex, allowing other threads to lock it.
